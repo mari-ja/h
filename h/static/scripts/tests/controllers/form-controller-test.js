@@ -251,31 +251,25 @@ describe('FormController', function () {
   });
 
   context('when focus moves outside of form', function () {
-    it('clears editing state if field does not have unsaved changes', function (done) {
+    it('clears editing state if field does not have unsaved changes', function () {
       startEditing();
 
       // Simulate user moving focus outside of form (eg. via tab key).
       // This may be to either another part of the page or browser chrome
       ctrl.refs.firstInput.blur();
 
-      setTimeout(function () {
-        assert.isFalse(isEditing());
-        done();
-      });
+      assert.isFalse(isEditing());
     });
 
-    it('keeps current field focused if it has unsaved changes', function (done) {
+    it('keeps current field focused if it has unsaved changes', function () {
       startEditing();
       ctrl.setState({dirty: true});
 
       // Simulate user/browser attempting to switch focus to an element outside
       // the form
-      ctrl.refs.firstInput.blur();
+      document.body.focus();
 
-      setTimeout(function () {
-        assert.equal(document.activeElement, ctrl.refs.firstInput);
-        done();
-      });
+      assert.equal(document.activeElement, ctrl.refs.firstInput);
     });
   });
 
@@ -309,15 +303,10 @@ describe('FormController', function () {
       assert.isFalse(isConfirmFieldHidden());
     });
 
-    it('hides initially-hidden fields when no input is focused', function (done) {
+    it('hides initially-hidden fields when no input is focused', function () {
       ctrl.refs.emailInput.focus();
       ctrl.refs.emailInput.blur();
-
-      // Add a timeout because the blur handler is triggered asynchronously
-      setTimeout(() => {
-        assert.isTrue(isConfirmFieldHidden());
-        done();
-      }, 0);
+      assert.isTrue(isConfirmFieldHidden());
     });
 
     it('shows all fields in an editing state when any is focused', function () {

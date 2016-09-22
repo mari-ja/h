@@ -70,23 +70,22 @@ class FormController extends Controller {
       event.stopPropagation();
     });
 
-    // When the user tabs outside of the form, cancel editing
-    this.on('blur', () => {
-      // Add a timeout because `document.activeElement` is not updated until
-      // after the event is processed
-      setTimeout(() => {
-        // If the user has made changes to the active element, then keep focus
-        // on the active field, otherwise allow them to move to the previous /
-        // next fields by tabbing
-        if (this.state.dirty && !this._isEditingFieldFocused()) {
-          this.state.editingFields[0].input.focus();
-        } else if (!this.element.contains(document.activeElement)) {
-          this.setState({
-            editingFields: [],
-            focusedField: null,
-          });
-        }
-      }, 0);
+    // Cancel editing when the user tabs out of the form. If the form has
+    // unsaved changes, then we keep focus within the set of fields being edited.
+    this.on('blur', event => {
+      // FocusEvent#relatedTarget has long been supported by WebKit but only
+      // recent versions of Firefox (>= 48). On browsers which do not support
+      // `relatedTarget`, we always let the user tab out of the current field
+      var newFocusedEl = event.relatedTarget;
+      if (newFocusedEl && this.state.dirty &&
+          !this._isElementInEditingField(newFocusedEl)) {
+        this.state.editingFields[0].input.focus();
+      } else if (!this.element.contains(newFocusedEl)) {
+        this.setState({
+          editingFields: [],
+          focusedField: null,
+        });
+      }
     }, true /* capture - 'blur' does not bubble */);
 
     // Setup AJAX handling for forms
@@ -199,21 +198,20 @@ class FormController extends Controller {
   }
 
   /**
-   * Return true if any of the fields in the set currently being edited has
-   * focus
+   * Return true if `element` is contained within a field that is currently
+   * being edited
    */
-  _isEditingFieldFocused() {
+  _isElementInEditingField(element) {
     if (this.state.editingFields.length === 0) {
       return false;
     }
 
-    var focusedEl = document.activeElement;
-    if (this.refs.formActions.contains(focusedEl)) {
+    if (this.refs.formActions.contains(element)) {
       return true;
     }
 
     return this.state.editingFields.some(field =>
-      field.container.contains(focusedEl));
+      field.container.contains(element));
   }
 
   /**
