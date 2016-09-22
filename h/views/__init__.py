@@ -2,12 +2,16 @@
 
 
 def includeme(config):
+    config.include('h.views.api_users')
     config.include('h.views.exceptions')
     config.include('h.views.help')
     config.include('h.views.home')
     config.include('h.views.main')
     config.include('h.views.client')
     config.include('h.views.panels')
+
+    # api
+    config.add_route('api.users', '/api/users')
 
     # homepage
     config.add_route('index', '/')
