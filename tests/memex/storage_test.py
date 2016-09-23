@@ -179,7 +179,7 @@ class TestCreateAnnotation(object):
 
         assert models.Annotation.return_value in pyramid_request.db.added
 
-    def test_it_updates_the_document_metadata_from_the_annotation(self,
+    def test_it_updates_the_document_metadata_from_the_annotation_foo(self,
                                                                   models,
                                                                   pyramid_request,
                                                                   update_document_metadata):
@@ -189,13 +189,13 @@ class TestCreateAnnotation(object):
         annotation_data['document']['document_uri_dicts'] = (
             mock.sentinel.document_uri_dicts)
 
-        storage.create_annotation(pyramid_request, annotation_data)
+        # storage.create_annotation(pyramid_request, annotation_data)
 
         update_document_metadata.assert_called_once_with(
             pyramid_request.db,
             models.Annotation.return_value,
             mock.sentinel.document_meta_dicts,
-            mock.sentinel.document_uri_dicts
+            mock.sentinel.document_uri_dicts,
         )
 
     def test_it_returns_the_annotation(self, models, pyramid_request):

@@ -87,6 +87,8 @@ def create_annotation(request, data):
     :returns: the created annotation
     :rtype: dict
     """
+    created = updated = datetime.utcnow()
+
     document_uri_dicts = data['document']['document_uri_dicts']
     document_meta_dicts = data['document']['document_meta_dicts']
     del data['document']
@@ -116,14 +118,18 @@ def create_annotation(request, data):
                                             'of!'))
 
     annotation = models.Annotation(**data)
+    annotation.created = created
+    annotation.updated = updated
     request.db.add(annotation)
 
-    # We need to flush the db here so that annotation.created and
-    # annotation.updated get created.
-    request.db.flush()
-
+    print(annotation.target_uri)
     models.update_document_metadata(
-        request.db, annotation, document_meta_dicts, document_uri_dicts)
+        request.db,
+        annotation.target_uri,
+        document_meta_dicts,
+        document_uri_dicts,
+        created=created,
+        updated=updated)
 
     return annotation
 
